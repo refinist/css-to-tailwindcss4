@@ -1,0 +1,333 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`convertCSS > converts a small block under the default theme 1`] = `
+".card {
+    @apply flex p-6 rounded-lg shadow-xs text-white bg-black/50;
+}
+    "
+`;
+
+exports[`convertCSS > converts the broad fixture (default theme) > fixture.default.classes 1`] = `
+[
+  "flex",
+  "relative",
+  "top-0",
+  "left-4",
+  "right-auto",
+  "-bottom-8",
+  "float-none",
+  "clear-both",
+  "overflow-hidden",
+  "overflow-x-auto",
+  "overflow-y-scroll",
+  "invisible",
+  "z-10",
+  "isolate",
+  "box-border",
+  "object-cover",
+  "object-center",
+  "flex-row-reverse",
+  "flex-wrap",
+  "flex-1",
+  "grow",
+  "shrink-0",
+  "basis-auto",
+  "-order-1",
+  "justify-between",
+  "items-center",
+  "content-around",
+  "self-stretch",
+  "gap-6",
+  "gap-x-2",
+  "gap-y-4",
+  "grid",
+  "grid-cols-3",
+  "grid-rows-2",
+  "col-span-2",
+  "row-span-1",
+  "grid-flow-row-dense",
+  "auto-cols-fr",
+  "gap-4",
+  "place-items-center",
+  "place-content-evenly",
+  "justify-items-start",
+  "justify-self-end",
+  "place-self-stretch",
+  "p-4",
+  "pt-2",
+  "px-6",
+  "-m-2",
+  "ml-auto",
+  "my-8",
+  "scroll-p-4",
+  "scroll-mt-1",
+  "w-full",
+  "h-dvh",
+  "min-w-0",
+  "min-h-screen",
+  "max-w-7xl",
+  "max-h-fit",
+  "aspect-video",
+  "w-1/3",
+  "h-1/2",
+  "text-[rgb(15_23_42)]",
+  "font-sans",
+  "text-xl",
+  "font-semibold",
+  "italic",
+  "leading-normal",
+  "tracking-tight",
+  "text-center",
+  "uppercase",
+  "underline",
+  "decoration-dashed",
+  "decoration-current",
+  "decoration-2",
+  "underline-offset-4",
+  "text-ellipsis",
+  "align-middle",
+  "whitespace-nowrap",
+  "break-all",
+  "hyphens-auto",
+  "list-disc",
+  "list-inside",
+  "antialiased",
+  "tabular-nums",
+  "content-none",
+  "text-[#0ea5e9]",
+  "text-[rgb(14_165_233)]",
+  "text-sky-500",
+  "text-(--brand-text)",
+  "bg-black/40",
+  "bg-white",
+  "bg-linear-to-r",
+  "bg-center",
+  "bg-cover",
+  "bg-no-repeat",
+  "bg-clip-padding",
+  "bg-origin-border",
+  "bg-fixed",
+  "bg-blend-multiply",
+  "border",
+  "border-solid",
+  "border-gray-200",
+  "border-t-2",
+  "border-r-black/10",
+  "rounded-lg",
+  "rounded-tl-none",
+  "border-dashed",
+  "border-0",
+  "rounded-full",
+  "outline-hidden",
+  "outline-offset-4",
+  "shadow-xs",
+  "opacity-75",
+  "mix-blend-multiply",
+  "filter-none",
+  "backdrop-filter-none",
+  "shadow-md",
+  "transition-opacity",
+  "duration-150",
+  "delay-75",
+  "ease-in-out",
+  "rotate-45",
+  "scale-105",
+  "origin-top-left",
+  "transform-3d",
+  "perspective-midrange",
+  "cursor-pointer",
+  "select-none",
+  "pointer-events-auto",
+  "resize",
+  "scroll-smooth",
+  "touch-pan-y",
+  "will-change-transform",
+  "accent-[#3b82f6]",
+  "caret-current",
+  "appearance-none",
+  "fill-current",
+  "stroke-[#0ea5e9]",
+  "stroke-2",
+  "table-fixed",
+  "border-collapse",
+  "border-spacing-x-1",
+  "border-spacing-y-2",
+  "caption-top",
+  "columns-3",
+  "break-inside-avoid",
+  "break-after-avoid",
+  "box-decoration-clone",
+  "snap-x",
+  "snap-mandatory",
+  "snap-center",
+  "snap-always",
+  "hover:bg-black/5",
+  "focus-visible:outline-offset-2",
+  "pl-0",
+  "bg-slate-50",
+  "bg-slate-100",
+  "before:content-none",
+  "after:content-none",
+  "data-[state=open]:block",
+  "aria-[expanded=true]:flex",
+  "md:p-8",
+  "md:text-base",
+  "xl:grid",
+  "dark:text-white",
+  "dark:bg-black",
+  "motion-reduce:transition-none",
+  "contrast-more:text-black",
+  "@md:flex",
+  "supports-[(display:_grid)]:grid",
+  "block!",
+  "bg-(--brand)",
+  "text-(--brand-text)",
+]
+`;
+
+exports[`convertCSS > converts the broad fixture (default theme) > fixture.default.css 1`] = `
+".layout {
+    @apply flex relative top-0 left-4 right-auto -bottom-8 float-none clear-both overflow-hidden overflow-x-auto overflow-y-scroll invisible z-10 isolate box-border object-cover object-center;
+}
+.flex-row {
+    @apply flex-row-reverse flex-wrap flex-1 grow shrink-0 basis-auto -order-1 justify-between items-center content-around self-stretch gap-6 gap-x-2 gap-y-4;
+}
+.grid-area {
+    @apply grid grid-cols-3 grid-rows-2 col-span-2 row-span-1 grid-flow-row-dense auto-cols-fr gap-4 place-items-center place-content-evenly justify-items-start justify-self-end place-self-stretch;
+}
+.spacing {
+    @apply p-4 pt-2 px-6 -m-2 ml-auto my-8 scroll-p-4 scroll-mt-1;
+}
+.sizing {
+    @apply w-full h-dvh min-w-0 min-h-screen max-w-7xl max-h-fit aspect-video;
+}
+.sizing-fraction {
+    @apply w-1/3 h-1/2;
+}
+.type {
+    @apply text-[rgb(15_23_42)] font-sans text-xl font-semibold italic leading-normal tracking-tight text-center uppercase underline decoration-dashed decoration-current decoration-2 underline-offset-4 text-ellipsis align-middle whitespace-nowrap break-all hyphens-auto list-disc list-inside antialiased tabular-nums content-none;
+}
+.colors-hex {
+    @apply text-[#0ea5e9];
+}
+.colors-rgb {
+    @apply text-[rgb(14_165_233)];
+}
+.colors-oklch {
+    @apply text-sky-500;
+}
+.colors-var {
+    @apply text-(--brand-text);
+}
+.colors-alpha {
+    @apply bg-black/40;
+}
+.bg {
+    @apply bg-white bg-linear-to-r bg-center bg-cover bg-no-repeat bg-clip-padding bg-origin-border bg-fixed bg-blend-multiply;
+}
+.borders {
+    @apply border border-solid border-gray-200 border-t-2 border-r-black/10 rounded-lg rounded-tl-none border-dashed;
+}
+.borders-shorthand-zero {
+    @apply border-0;
+}
+.borders-radius-pill {
+    @apply rounded-full;
+}
+.outline-removed {
+    @apply outline-hidden;
+}
+.outline-styled {
+    @apply outline-offset-4;
+    outline: 2px solid #3b82f6;
+}
+.effects {
+    @apply shadow-xs opacity-75 mix-blend-multiply filter-none backdrop-filter-none;
+}
+.shadow-md {
+    @apply shadow-md;
+}
+.transition {
+    @apply transition-opacity duration-150 delay-75 ease-in-out;
+}
+.transform {
+    @apply rotate-45 scale-105 origin-top-left transform-3d perspective-midrange;
+}
+.interact {
+    @apply cursor-pointer select-none pointer-events-auto resize scroll-smooth touch-pan-y will-change-transform accent-[#3b82f6] caret-current appearance-none;
+}
+.icon {
+    @apply fill-current stroke-[#0ea5e9] stroke-2;
+}
+.table {
+    @apply table-fixed border-collapse border-spacing-x-1 border-spacing-y-2 caption-top;
+}
+.col-list {
+    @apply columns-3 break-inside-avoid break-after-avoid box-decoration-clone;
+}
+.snap {
+    @apply snap-x snap-mandatory snap-center snap-always;
+}
+.btn {
+    @apply hover:bg-black/5 focus-visible:outline-offset-2;
+}
+.btn:focus-visible {
+    outline: 2px solid #3b82f6;
+}
+.list :first-child {
+    @apply pl-0;
+}
+.list :nth-child(odd) {
+    @apply bg-slate-50;
+}
+.list :nth-child(2n) {
+    @apply bg-slate-100;
+}
+.tooltip {
+    @apply before:content-none after:content-none;
+}
+[data-state='open'] {
+    @apply data-[state=open]:block;
+}
+[aria-expanded='true'] {
+    @apply aria-[expanded=true]:flex;
+}
+.responsive {
+    @apply md:p-8 md:text-base;
+}
+.responsive-xl {
+    @apply xl:grid;
+}
+.responsive-dark {
+    @apply dark:text-white dark:bg-black;
+}
+.reduce {
+    @apply motion-reduce:transition-none;
+}
+.contrast {
+    @apply contrast-more:text-black;
+}
+.card {
+    @apply @md:flex;
+}
+.grid-support {
+    @apply supports-[(display:_grid)]:grid;
+}
+.bang {
+    @apply block!;
+}
+.with-var {
+    @apply bg-(--brand) text-(--brand-text);
+}
+"
+`;
+
+exports[`convertCSS > flattens nested CSS via the postCSSPlugins hook (postcss-nested) > nested.css 1`] = `
+".card {
+    @apply p-4 hover:bg-black/5;
+}
+.card .title {
+    @apply font-bold;
+}
+      "
+`;

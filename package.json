@@ -1,0 +1,69 @@
+{
+  "name": "css-to-tailwindcss4",
+  "type": "module",
+  "version": "0.0.1",
+  "packageManager": "pnpm@11.1.1",
+  "description": "css to tailwindcss4 converter",
+  "author": "REFINIST",
+  "license": "MIT",
+  "homepage": "https://github.com/refinist/css-to-tailwindcss4#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/refinist/css-to-tailwindcss4.git"
+  },
+  "bugs": {
+    "url": "https://github.com/refinist/css-to-tailwindcss4/issues"
+  },
+  "keywords": [
+    "css",
+    "tailwind",
+    "tailwindcss",
+    "tailwindcss4",
+    "tailwind-v4",
+    "converter",
+    "postcss"
+  ],
+  "exports": {
+    ".": "./dist/index.mjs"
+  },
+  "types": "./dist/index.d.mts",
+  "files": [
+    "README.en.md",
+    "dist"
+  ],
+  "engines": {
+    "node": "^22.18.0 || >=24.0.0"
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsgo --noEmit",
+    "lint": "eslint --cache --max-warnings 0 .",
+    "lint:fix": "pnpm lint --fix",
+    "format": "prettier --write --cache ."
+  },
+  "dependencies": {
+    "colord": "^2.9.3",
+    "postcss": "^8.5.14",
+    "postcss-safe-parser": "^7.0.1",
+    "postcss-selector-parser": "^7.1.1"
+  },
+  "devDependencies": {
+    "@refinist/eslint-config": "^1.3.0",
+    "@refinist/prettier-config": "^1.2.0",
+    "@types/node": "^25.7.0",
+    "@typescript/native-preview": "7.0.0-dev.20260514.1",
+    "@vitest/coverage-v8": "^4.1.6",
+    "bumpp": "^11.1.0",
+    "eslint": "^10.3.0",
+    "postcss-nested": "^7.0.2",
+    "prettier": "^3.8.3",
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.6"
+  },
+  "prettier": "@refinist/prettier-config"
+}
