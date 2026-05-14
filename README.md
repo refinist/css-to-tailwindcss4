@@ -4,6 +4,8 @@
 
 将 CSS 转换成 Tailwind CSS v4 utility classes。
 
+> 本项目参考 [`css-to-tailwindcss`](https://github.com/Jackardios/css-to-tailwindcss) 的核心转换思路，并针对 Tailwind CSS v4 的 CSS-first theme、utility 命名和语法变化做升级。
+
 ## 特性
 
 - 覆盖常见 Tailwind CSS v4 utilities，包括 layout、flex、grid、spacing、
@@ -293,4 +295,6 @@ await convertCSS('.x:hover { display: flex !important; }', { prefix: 'tw' });
 
 ## License
 
-MIT. See `LICENSE`.
+[MIT](./LICENSE)
+
+Copyright (c) 2026-present, [REFINIST](https://github.com/refinist)

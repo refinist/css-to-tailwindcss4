@@ -5,5 +5,5 @@ coverage
 *.log
 .vscode
 .idea
-
+.eslintcache
 *local*

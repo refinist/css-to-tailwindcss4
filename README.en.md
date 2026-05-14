@@ -4,6 +4,8 @@
 
 Convert CSS to Tailwind CSS v4 utility classes.
 
+> This project follows the core conversion approach of [`css-to-tailwindcss`](https://github.com/Jackardios/css-to-tailwindcss) and updates it for Tailwind CSS v4's CSS-first theme, utility names, and syntax changes.
+
 ## Features
 
 - Supports common Tailwind CSS v4 utilities across layout, flex, grid,
@@ -295,4 +297,6 @@ The converter maps supported selectors and at-rules to variant prefixes:
 
 ## License
 
-MIT. See `LICENSE`.
+[MIT](./LICENSE)
+
+Copyright (c) 2026-present, [REFINIST](https://github.com/refinist)
