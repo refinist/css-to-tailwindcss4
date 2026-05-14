@@ -42,7 +42,9 @@
     "typecheck": "tsgo --noEmit",
     "lint": "eslint --cache --max-warnings 0 .",
     "lint:fix": "pnpm lint --fix",
-    "format": "prettier --write --cache ."
+    "format": "prettier --write --cache .",
+    "prepublishOnly": "pnpm run build",
+    "release": "bumpp"
   },
   "dependencies": {
     "colord": "^2.9.3",

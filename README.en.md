@@ -2,38 +2,54 @@
 
 [中文](./README.md) | English
 
+[![npm](https://img.shields.io/npm/v/css-to-tailwindcss4.svg?colorA=00bcff&colorB=000000)](https://npmjs.com/package/css-to-tailwindcss4) [![downloads/month](https://img.shields.io/npm/dm/css-to-tailwindcss4.svg?colorA=00bcff&colorB=000000)](https://npmjs.com/package/css-to-tailwindcss4) [![Unit Test](https://img.shields.io/github/actions/workflow/status/refinist/css-to-tailwindcss4/unit-test.yml?colorA=00bcff&colorB=000000&label=Unit%20Test)](https://github.com/refinist/css-to-tailwindcss4/actions/workflows/unit-test.yml) [![codecov](https://img.shields.io/codecov/c/github/refinist/css-to-tailwindcss4?colorA=00bcff&colorB=000000)](https://codecov.io/github/refinist/css-to-tailwindcss4)
+
 Convert CSS to Tailwind CSS v4 utility classes.
 
 > This project follows the core conversion approach of [`css-to-tailwindcss`](https://github.com/Jackardios/css-to-tailwindcss) and updates it for Tailwind CSS v4's CSS-first theme, utility names, and syntax changes.
 
-## Features
+## ✨ Features
 
-- Supports common Tailwind CSS v4 utilities across layout, flex, grid,
+- 🧱 Supports common Tailwind CSS v4 utilities across layout, flex, grid,
   spacing, sizing, typography, colors, borders, effects, transforms,
   transitions, tables, SVG, interactivity, media queries, container queries,
   supports rules, and selector variants.
-- Reads Tailwind v4 CSS-first theme tokens from `@theme { ... }`.
-- Falls back to Tailwind v4 default theme tokens when no custom theme is
+- 🎨 Reads Tailwind v4 CSS-first theme tokens from `@theme { ... }`.
+- 🧭 Falls back to Tailwind v4 default theme tokens when no custom theme is
   provided.
-- Matches colors across common CSS formats, including named colors, hex, rgb,
+- 🌈 Matches colors across common CSS formats, including named colors, hex, rgb,
   and Tailwind v4 OKLCH palette values.
-- Emits v4 slash opacity classes such as `bg-black/50`.
-- Emits v4 CSS variable arbitrary values such as `bg-(--brand)`.
-- Expands spacing shorthands into stable utilities, for example
+- 💧 Emits v4 slash opacity classes such as `bg-black/50`.
+- 🔣 Emits v4 CSS variable arbitrary values such as `bg-(--brand)`.
+- 📐 Expands spacing shorthands into stable utilities, for example
   `padding: 1rem 2rem` becomes `py-4 px-8`.
-- Converts px spacing values back to the default rem-based spacing scale by
+- 📏 Converts px spacing values back to the default rem-based spacing scale by
   default, for example `margin-top: 4px` becomes `mt-1`.
-- Supports PostCSS plugins before conversion, such as `postcss-nested`.
-- Skips non-convertible declarations by default, with an option to emit
+- 🔌 Supports PostCSS plugins before conversion, such as `postcss-nested`.
+- 🧯 Skips non-convertible declarations by default, with an option to emit
   arbitrary property classes like `[mask-type:luminance]`.
 
-## Install
+## 📦 Install
 
 ```bash
-npm install css-to-tailwindcss4
+# pnpm
+pnpm add -D css-to-tailwindcss4
+
+# yarn
+yarn add -D css-to-tailwindcss4
+
+# bun
+bun add -d css-to-tailwindcss4
+
+# npm
+npm install -D css-to-tailwindcss4
 ```
 
-## Usage
+## 🟢 Requirements
+
+Requires Node.js `^22.18.0 || >=24.0.0`.
+
+## 🚀 Usage
 
 ```ts
 import { convertCSS } from 'css-to-tailwindcss4';
@@ -132,7 +148,7 @@ Console output `result.rules`:
 ];
 ```
 
-## API
+## 🧩 API
 
 ### `convertCSS(css, options?)`
 
@@ -161,7 +177,7 @@ function convertCSS(
 | `classes` | `string[]`        | Flat list of every generated Tailwind class.               |
 | `css`     | `string`          | Reconstructed CSS with converted declarations as `@apply`. |
 
-## Tailwind v4 handling
+## 🎨 Tailwind v4 handling
 
 ### CSS-first theme
 
@@ -258,7 +274,7 @@ The converter maps supported selectors and at-rules to variant prefixes:
 ['hover:text-white', 'dark:bg-black', '@md:flex'];
 ```
 
-## What's converted
+## 🔧 What's converted
 
 - Layout: `display`, `position`, inset, `float`, `clear`, overflow,
   visibility, `z-index`, isolation, object fit/position, and box sizing.
@@ -286,16 +302,7 @@ The converter maps supported selectors and at-rules to variant prefixes:
 - Variants from `@media`, `@container`, `@supports`, pseudo-classes,
   pseudo-elements, `not()`, `has()`, `nth-child()`, `[data-*]`, and `[aria-*]`.
 
-## Limitations
-
-- Custom plugin output is not generated.
-- Container query names are not preserved.
-- Unsupported declarations remain in `leftover` unless `arbitraryProperties`
-  is enabled.
-- The converter is not a lossless CSS round-trip tool; it focuses on producing
-  Tailwind v4 utilities for declarations it can map confidently.
-
-## License
+## 📄 License
 
 [MIT](./LICENSE)
 

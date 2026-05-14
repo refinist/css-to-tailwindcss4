@@ -2,37 +2,53 @@
 
 中文 | [English](./README.en.md)
 
+[![npm](https://img.shields.io/npm/v/css-to-tailwindcss4.svg?colorA=00bcff&colorB=000000)](https://npmjs.com/package/css-to-tailwindcss4) [![downloads/month](https://img.shields.io/npm/dm/css-to-tailwindcss4.svg?colorA=00bcff&colorB=000000)](https://npmjs.com/package/css-to-tailwindcss4) [![Unit Test](https://img.shields.io/github/actions/workflow/status/refinist/css-to-tailwindcss4/unit-test.yml?colorA=00bcff&colorB=000000&label=Unit%20Test)](https://github.com/refinist/css-to-tailwindcss4/actions/workflows/unit-test.yml) [![codecov](https://img.shields.io/codecov/c/github/refinist/css-to-tailwindcss4?colorA=00bcff&colorB=000000)](https://codecov.io/github/refinist/css-to-tailwindcss4)
+
 将 CSS 转换成 Tailwind CSS v4 utility classes。
 
 > 本项目参考 [`css-to-tailwindcss`](https://github.com/Jackardios/css-to-tailwindcss) 的核心转换思路，并针对 Tailwind CSS v4 的 CSS-first theme、utility 命名和语法变化做升级。
 
-## 特性
+## ✨ 特性
 
-- 覆盖常见 Tailwind CSS v4 utilities，包括 layout、flex、grid、spacing、
+- 🧱 覆盖常见 Tailwind CSS v4 utilities，包括 layout、flex、grid、spacing、
   sizing、typography、colors、borders、effects、transforms、transitions、
   tables、SVG、interactivity、media queries、container queries、supports
   rules 和 selector variants。
-- 读取 Tailwind v4 CSS-first 的 `@theme { ... }` token。
-- 未传入自定义 theme 时，使用 Tailwind v4 默认 theme token。
-- 支持常见 CSS 颜色格式匹配，包括 named colors、hex、rgb，以及 Tailwind v4
+- 🎨 读取 Tailwind v4 CSS-first 的 `@theme { ... }` token。
+- 🧭 未传入自定义 theme 时，使用 Tailwind v4 默认 theme token。
+- 🌈 支持常见 CSS 颜色格式匹配，包括 named colors、hex、rgb，以及 Tailwind v4
   默认 OKLCH palette。
-- 输出 v4 slash opacity class，例如 `bg-black/50`。
-- 输出 v4 CSS variable 任意值语法，例如 `bg-(--brand)`。
-- 会把 spacing shorthand 展开成稳定的 utility，例如
+- 💧 输出 v4 slash opacity class，例如 `bg-black/50`。
+- 🔣 输出 v4 CSS variable 任意值语法，例如 `bg-(--brand)`。
+- 📐 会把 spacing shorthand 展开成稳定的 utility，例如
   `padding: 1rem 2rem` 会转换成 `py-4 px-8`。
-- 默认会把 px spacing value 反查回 rem spacing scale，例如
+- 📏 默认会把 px spacing value 反查回 rem spacing scale，例如
   `margin-top: 4px` 会转换成 `mt-1`。
-- 支持转换前运行 PostCSS plugins，例如 `postcss-nested`。
-- 默认跳过无法转换的 declaration；也可以开启选项输出 arbitrary property
+- 🔌 支持转换前运行 PostCSS plugins，例如 `postcss-nested`。
+- 🧯 默认跳过无法转换的 declaration；也可以开启选项输出 arbitrary property
   class，例如 `[mask-type:luminance]`。
 
-## 安装
+## 📦 安装
 
 ```bash
-npm install css-to-tailwindcss4
+# pnpm
+pnpm add -D css-to-tailwindcss4
+
+# yarn
+yarn add -D css-to-tailwindcss4
+
+# bun
+bun add -d css-to-tailwindcss4
+
+# npm
+npm install -D css-to-tailwindcss4
 ```
 
-## 使用
+## 🟢 环境要求
+
+需要 Node.js `^22.18.0 || >=24.0.0`。
+
+## 🚀 使用
 
 ```ts
 import { convertCSS } from 'css-to-tailwindcss4';
@@ -131,7 +147,7 @@ console.log(result.rules);
 ];
 ```
 
-## API
+## 🧩 API
 
 ### `convertCSS(css, options?)`
 
@@ -160,7 +176,7 @@ function convertCSS(
 | `classes` | `string[]`        | 所有生成的 Tailwind class 的扁平数组。          |
 | `css`     | `string`          | 把可转换 declaration 替换为 `@apply` 后的 CSS。 |
 
-## Tailwind v4 处理
+## 🎨 Tailwind v4 处理
 
 ### CSS-first theme
 
@@ -257,7 +273,7 @@ await convertCSS('.x:hover { display: flex !important; }', { prefix: 'tw' });
 ['hover:text-white', 'dark:bg-black', '@md:flex'];
 ```
 
-## 转换范围
+## 🔧 转换范围
 
 - Layout：`display`、`position`、inset、`float`、`clear`、overflow、
   visibility、`z-index`、isolation、object fit/position 和 box sizing。
@@ -285,15 +301,7 @@ await convertCSS('.x:hover { display: flex !important; }', { prefix: 'tw' });
 - 来自 `@media`、`@container`、`@supports`、pseudo-classes、pseudo-elements、
   `not()`、`has()`、`nth-child()`、`[data-*]` 和 `[aria-*]` 的 variants。
 
-## 限制
-
-- 不生成 custom plugin output。
-- 不保留 container query name。
-- 不支持的 declarations 会留在 `leftover`，除非开启 `arbitraryProperties`。
-- 这不是 lossless CSS round-trip 工具；它专注于把能稳定映射的 declaration
-  转换成 Tailwind v4 utilities。
-
-## License
+## 📄 License
 
 [MIT](./LICENSE)
 
