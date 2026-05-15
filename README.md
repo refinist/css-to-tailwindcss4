@@ -1,34 +1,35 @@
 # css-to-tailwindcss4
 
-中文 | [English](./README.en.md)
+English | [中文](./README.zh-CN.md)
 
 [![npm](https://img.shields.io/npm/v/css-to-tailwindcss4.svg?colorA=00bcff&colorB=000000)](https://npmjs.com/package/css-to-tailwindcss4) [![downloads/month](https://img.shields.io/npm/dm/css-to-tailwindcss4.svg?colorA=00bcff&colorB=000000)](https://npmjs.com/package/css-to-tailwindcss4) [![Unit Test](https://img.shields.io/github/actions/workflow/status/refinist/css-to-tailwindcss4/unit-test.yml?colorA=00bcff&colorB=000000&label=Unit%20Test)](https://github.com/refinist/css-to-tailwindcss4/actions/workflows/unit-test.yml) [![codecov](https://img.shields.io/codecov/c/github/refinist/css-to-tailwindcss4?colorA=00bcff&colorB=000000)](https://codecov.io/github/refinist/css-to-tailwindcss4)
 
-将 CSS 转换成 Tailwind CSS v4 utility classes。
+Convert CSS to Tailwind CSS v4 utility classes.
 
-> 本项目参考 [`css-to-tailwindcss`](https://github.com/Jackardios/css-to-tailwindcss) 的核心转换思路，并针对 Tailwind CSS v4 的 CSS-first theme、utility 命名和语法变化做升级。
+> This project follows the core conversion approach of [`css-to-tailwindcss`](https://github.com/Jackardios/css-to-tailwindcss) and updates it for Tailwind CSS v4's CSS-first theme, utility names, and syntax changes.
 
-## ✨ 特性
+## ✨ Features
 
-- 🧱 覆盖常见 Tailwind CSS v4 utilities，包括 layout、flex、grid、spacing、
-  sizing、typography、colors、borders、effects、transforms、transitions、
-  tables、SVG、interactivity、media queries、container queries、supports
-  rules 和 selector variants。
-- 🎨 读取 Tailwind v4 CSS-first 的 `@theme { ... }` token。
-- 🧭 未传入自定义 theme 时，使用 Tailwind v4 默认 theme token。
-- 🌈 支持常见 CSS 颜色格式匹配，包括 named colors、hex、rgb，以及 Tailwind v4
-  默认 OKLCH palette。
-- 💧 输出 v4 slash opacity class，例如 `bg-black/50`。
-- 🔣 输出 v4 CSS variable 任意值语法，例如 `bg-(--brand)`。
-- 📐 会把 spacing shorthand 展开成稳定的 utility，例如
-  `padding: 1rem 2rem` 会转换成 `py-4 px-8`。
-- 📏 默认会把 px spacing value 反查回 rem spacing scale，例如
-  `margin-top: 4px` 会转换成 `mt-1`。
-- 🔌 支持转换前运行 PostCSS plugins，例如 `postcss-nested`。
-- 🧯 默认跳过无法转换的 declaration；也可以开启选项输出 arbitrary property
-  class，例如 `[mask-type:luminance]`。
+- 🧱 Supports common Tailwind CSS v4 utilities across layout, flex, grid,
+  spacing, sizing, typography, colors, borders, effects, transforms,
+  transitions, tables, SVG, interactivity, media queries, container queries,
+  supports rules, and selector variants.
+- 🎨 Reads Tailwind v4 CSS-first theme tokens from `@theme { ... }`.
+- 🧭 Falls back to Tailwind v4 default theme tokens when no custom theme is
+  provided.
+- 🌈 Matches colors across common CSS formats, including named colors, hex, rgb,
+  and Tailwind v4 OKLCH palette values.
+- 💧 Emits v4 slash opacity classes such as `bg-black/50`.
+- 🔣 Emits v4 CSS variable arbitrary values such as `bg-(--brand)`.
+- 📐 Expands spacing shorthands into stable utilities, for example
+  `padding: 1rem 2rem` becomes `py-4 px-8`.
+- 📏 Converts px spacing values back to the default rem-based spacing scale by
+  default, for example `margin-top: 4px` becomes `mt-1`.
+- 🔌 Supports PostCSS plugins before conversion, such as `postcss-nested`.
+- 🧯 Skips non-convertible declarations by default, with an option to emit
+  arbitrary property classes like `[mask-type:luminance]`.
 
-## 📦 安装
+## 📦 Install
 
 ```bash
 # pnpm
@@ -44,11 +45,11 @@ bun add -d css-to-tailwindcss4
 npm install -D css-to-tailwindcss4
 ```
 
-## 🟢 环境要求
+## 🟢 Requirements
 
-需要 Node.js `^22.18.0 || >=24.0.0`。
+Requires Node.js `^22.18.0 || >=24.0.0`.
 
-## 🚀 使用
+## 🚀 Usage
 
 ```ts
 import { convertCSS } from 'css-to-tailwindcss4';
@@ -90,7 +91,7 @@ console.log(result.css);
 console.log(result.rules);
 ```
 
-`result.classes` 输出：
+Console output `result.classes`:
 
 ```js
 [
@@ -106,7 +107,7 @@ console.log(result.rules);
 ];
 ```
 
-`result.css` 输出：
+Console output `result.css`:
 
 ```css
 .card {
@@ -114,7 +115,7 @@ console.log(result.rules);
 }
 ```
 
-`result.rules` 输出：
+Console output `result.rules`:
 
 ```js
 [
@@ -160,28 +161,28 @@ function convertCSS(
 
 #### Options
 
-| Option                | 类型               | 默认值      | 说明                                                                |
-| --------------------- | ------------------ | ----------- | ------------------------------------------------------------------- |
-| `themeCSS`            | `string`           | v4 defaults | 包含 Tailwind v4 `@theme { ... }` 的 CSS 字符串。                   |
-| `arbitraryProperties` | `boolean`          | `false`     | 将未知 declaration 转换成 `[x:y]` 形式的 arbitrary property class。 |
-| `prefix`              | `string`           | `undefined` | 按 v4 顺序给 utility 加 prefix，例如 `tw:hover:flex`。              |
-| `remInPx`             | `number` \| `null` | `16`        | px 值反查 spacing token 时，`1rem` 对应的 px 数。                   |
-| `postCSSPlugins`      | `AcceptedPlugin[]` | `[]`        | 转换前先运行的 PostCSS plugins。                                    |
+| Option                | Type               | Default     | Description                                                                  |
+| --------------------- | ------------------ | ----------- | ---------------------------------------------------------------------------- |
+| `themeCSS`            | `string`           | v4 defaults | CSS containing Tailwind v4 `@theme { ... }` blocks.                          |
+| `arbitraryProperties` | `boolean`          | `false`     | Convert unknown declarations to arbitrary property classes like `[x:y]`.     |
+| `prefix`              | `string`           | `undefined` | Prefix emitted utilities using v4 prefix order, for example `tw:hover:flex`. |
+| `remInPx`             | `number` \| `null` | `16`        | Pixel size of `1rem` when matching px values to spacing tokens.              |
+| `postCSSPlugins`      | `AcceptedPlugin[]` | `[]`        | PostCSS plugins to run before conversion.                                    |
 
 #### Result
 
-| 字段      | 类型              | 说明                                            |
-| --------- | ----------------- | ----------------------------------------------- |
-| `rules`   | `ConvertedRule[]` | 按文档顺序返回的转换结果。                      |
-| `classes` | `string[]`        | 所有生成的 Tailwind class 的扁平数组。          |
-| `css`     | `string`          | 把可转换 declaration 替换为 `@apply` 后的 CSS。 |
+| Field     | Type              | Description                                                |
+| --------- | ----------------- | ---------------------------------------------------------- |
+| `rules`   | `ConvertedRule[]` | Converted rules in document order.                         |
+| `classes` | `string[]`        | Flat list of every generated Tailwind class.               |
+| `css`     | `string`          | Reconstructed CSS with converted declarations as `@apply`. |
 
-## 🎨 Tailwind v4 处理
+## 🎨 Tailwind v4 handling
 
 ### CSS-first theme
 
-Tailwind v4 的 theme 值来自 `@theme` 下的 CSS variables。转换器会解析这些
-variables，并用它们做 value 到 token 的反查：
+Tailwind v4 theme values live in CSS variables under `@theme`. The converter
+parses those variables and uses them for reverse lookups:
 
 ```ts
 await convertCSS('.x { color: #ff0066; }', {
@@ -190,14 +191,14 @@ await convertCSS('.x { color: #ff0066; }', {
 // ['text-brand-500']
 ```
 
-当前支持的 theme namespace 包括 colors、spacing、fonts、text sizes、font
-weights、tracking、leading、breakpoints、containers、radius、shadow、
-inset-shadow、drop-shadow、blur、perspective、aspect、easing、animations、
-tab-size 和 zoom。
+Supported theme namespaces include colors, spacing, fonts, text sizes, font
+weights, tracking, leading, breakpoints, containers, radius, shadow,
+inset-shadow, drop-shadow, blur, perspective, aspect, easing, animations,
+tab-size, and zoom.
 
-### 重命名的 scale
+### Renamed scales
 
-默认 theme 使用 Tailwind v4 的 scale 名称：
+The default theme uses Tailwind v4 names for renamed scales:
 
 ```css
 .x {
@@ -212,7 +213,7 @@ tab-size 和 zoom。
 
 ### Slash opacity
 
-带 alpha 的颜色会输出 v4 slash opacity utility：
+Alpha colors emit v4 slash opacity utilities:
 
 ```css
 .x {
@@ -224,9 +225,9 @@ tab-size 和 zoom。
 ['bg-black/50'];
 ```
 
-### CSS variable 任意值
+### CSS variable arbitrary values
 
-CSS variables 使用 Tailwind v4 的括号语法：
+CSS variables use Tailwind v4 parenthesis syntax:
 
 ```css
 .x {
@@ -238,9 +239,9 @@ CSS variables 使用 Tailwind v4 的括号语法：
 ['bg-(--brand)'];
 ```
 
-### Prefix 和 important
+### Prefix and important
 
-转换器会按 Tailwind v4 顺序输出 prefix、variants 和 important：
+The converter emits Tailwind v4 ordering for prefix, variants, and important:
 
 ```ts
 await convertCSS('.x:hover { display: flex !important; }', { prefix: 'tw' });
@@ -249,7 +250,7 @@ await convertCSS('.x:hover { display: flex !important; }', { prefix: 'tw' });
 
 ### Variants
 
-支持把部分 selector 和 at-rule 转成 variant prefix：
+The converter maps supported selectors and at-rules to variant prefixes:
 
 ```css
 .button:hover {
@@ -273,33 +274,33 @@ await convertCSS('.x:hover { display: flex !important; }', { prefix: 'tw' });
 ['hover:text-white', 'dark:bg-black', '@md:flex'];
 ```
 
-## 🔧 转换范围
+## 🔧 What's converted
 
-- Layout：`display`、`position`、inset、`float`、`clear`、overflow、
-  visibility、`z-index`、isolation、object fit/position 和 box sizing。
-- Flexbox 和 grid：alignment、order、basis、gaps、template tracks、auto
-  tracks、placement 和 spans。
-- Spacing：padding、margin、scroll padding、scroll margin、负值、shorthand
-  展开、axis reduction 和 px/rem 匹配。
-- Sizing：width、height、min/max dimensions、fractions、viewport units、
-  container sizes 和 aspect ratio。
-- Typography：color、font family、font size、font weight、line height、letter
-  spacing、text alignment、text decoration、whitespace、word breaking、lists、
-  font smoothing、numeric variants、tab size、content 和 font stretch。
-- Colors：token matching、OKLCH matching、alpha slash syntax、CSS variables、
-  current color、transparent 和 inherit。
-- Backgrounds：color、image gradients、position、size、repeat、clip、origin、
-  attachment 和 blend mode。
-- Borders 和 outline：color、width、style、radius、logical corners，以及 v4
-  `outline-hidden`。
-- Effects：shadow、inset shadow、opacity、blend modes、filters 和 backdrop
-  filters。
-- Transitions、transforms、tables、columns、breaks、scroll snap、SVG fill 和
-  stroke、cursor、selection、touch、resize、scroll behavior、appearance、field
-  sizing、color scheme、forced color adjustment、scrollbar width/gutter、
-  backface visibility 和 zoom。
-- 来自 `@media`、`@container`、`@supports`、pseudo-classes、pseudo-elements、
-  `not()`、`has()`、`nth-child()`、`[data-*]` 和 `[aria-*]` 的 variants。
+- Layout: `display`, `position`, inset, `float`, `clear`, overflow,
+  visibility, `z-index`, isolation, object fit/position, and box sizing.
+- Flexbox and grid, including alignment, order, basis, gaps, template tracks,
+  auto tracks, placement, and spans.
+- Spacing: padding, margin, scroll padding, scroll margin, negative values,
+  shorthand expansion, axis reduction, and px/rem matching.
+- Sizing: width, height, min/max dimensions, fractions, viewport units,
+  container sizes, and aspect ratio.
+- Typography: color, font family, font size, font weight, line height, letter
+  spacing, text alignment, text decoration, whitespace, word breaking, lists,
+  font smoothing, numeric variants, tab size, content, and font stretch.
+- Colors: token matching, OKLCH matching, alpha slash syntax, CSS variables,
+  current color, transparent, and inherit.
+- Backgrounds: color, image gradients, position, size, repeat, clip, origin,
+  attachment, and blend mode.
+- Borders and outline, including color, width, style, radius, logical corners,
+  and v4 `outline-hidden`.
+- Effects: shadow, inset shadow, opacity, blend modes, filters, and backdrop
+  filters.
+- Transitions, transforms, tables, columns, breaks, scroll snap, SVG fill and
+  stroke, cursor, selection, touch, resize, scroll behavior, appearance,
+  field sizing, color scheme, forced color adjustment, scrollbar width/gutter,
+  backface visibility, and zoom.
+- Variants from `@media`, `@container`, `@supports`, pseudo-classes,
+  pseudo-elements, `not()`, `has()`, `nth-child()`, `[data-*]`, and `[aria-*]`.
 
 ## 📄 License
 

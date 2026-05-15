@@ -28,7 +28,6 @@
   },
   "types": "./dist/index.d.mts",
   "files": [
-    "README.en.md",
     "dist"
   ],
   "engines": {
