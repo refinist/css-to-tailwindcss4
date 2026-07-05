@@ -115,9 +115,11 @@ export async function convertCSS(
 
     if (classes.length === 0 && leftover.length === 0) return;
 
+    // `base` is never empty: with variants the selector translator bails
+    // on an empty subject, and without variants it is the full selector.
     const reduced = reduceClasses(classes);
     rules.push({
-      selector: base || rule.selector,
+      selector: base,
       classes: reduced,
       leftover,
       variants

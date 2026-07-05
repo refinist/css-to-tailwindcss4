@@ -14,6 +14,7 @@ import {
   asCssVarReference,
   isDynamicExpression,
   joinForArbitrary,
+  splitCommaTopLevel,
   splitTopLevel,
   trimNumber
 } from '../src/utils/values.ts';
@@ -1302,5 +1303,118 @@ describe('handler inventory', () => {
     expect(nthChildVariant('2n')).toBe('even');
     expect(nthChildVariant('2n+1')).toBe('odd');
     expect(nthChildVariant('n+2')).toBeNull();
+  });
+});
+
+// Branch coverage for the v4-correctness fixes: ancestor at-rule
+// whitelist, gradient stop color matching, per-axis transforms, and
+// px<->rem breakpoint normalization.
+describe('v4-correctness branch coverage', () => {
+  test('rules under non-convertible ancestor at-rules are left untouched', async () => {
+    const result = await convertCSS(
+      '@layer components { @media (min-width: 40rem) { .foo { display: flex; } } }'
+    );
+    expect(result.rules).toEqual([]);
+    expect(result.css).toContain('@layer components');
+    expect(result.css).toContain('display: flex');
+  });
+
+  test('gradient stops map keywords, alpha colors, and short stop lists', async () => {
+    await expect(
+      classes(`
+      .a { background-image: linear-gradient(to right, transparent, currentColor); }
+      .b { background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), red); }
+      .c { background-image: linear-gradient(to right, red); }
+    `)
+    ).resolves.toEqual([
+      'bg-linear-to-r',
+      'from-transparent',
+      'to-current',
+      'bg-linear-to-b',
+      'from-black/50',
+      'to-[red]',
+      'bg-[linear-gradient(to_right,_red)]'
+    ]);
+  });
+
+  test('corner radius 50% stays elliptical instead of rounded-full', async () => {
+    await expect(
+      classes('.a { border-top-left-radius: 50%; }')
+    ).resolves.toEqual(['rounded-tl-[50%]']);
+  });
+
+  test('scroll-padding auto uses the arbitrary form', async () => {
+    await expect(
+      classes('.a { scroll-padding-top: auto; }')
+    ).resolves.toEqual(['scroll-pt-[auto]']);
+  });
+
+  test('three-value scale/translate expand per axis; four values stay leftover', async () => {
+    const result = await convertCSS(`
+      .a { scale: 1 0.5 2; translate: 4px 8px 12px; }
+      .b { scale: 1 2 3 4; translate: 1px 2px 3px 4px; }
+    `);
+    expect(result.rules[0]!.classes).toEqual([
+      'scale-x-100',
+      'scale-y-50',
+      'scale-z-200',
+      'translate-x-1',
+      'translate-y-2',
+      'translate-z-3'
+    ]);
+    expect(result.rules[1]!.classes).toEqual([]);
+    expect(result.rules[1]!.leftover.map(l => l.prop)).toEqual([
+      'scale',
+      'translate'
+    ]);
+  });
+
+  test('px-defined breakpoints match rem media queries (reverse direction)', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 48rem) { .a { display: flex; } }',
+      { themeCSS: '@theme { --breakpoint-md: 768px; }' }
+    );
+    expect(result.rules[0]!.classes).toEqual(['md:flex']);
+  });
+
+  test('non-integer scale percentages fall back to arbitrary', async () => {
+    await expect(classes('.a { scale: 1.055; }')).resolves.toEqual([
+      'scale-[1.055]'
+    ]);
+  });
+
+  test('rem media query with no matching breakpoint skips the rule', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 47rem) { .a { display: flex; } }'
+    );
+    expect(result.rules).toEqual([]);
+  });
+
+  test('px media query is not normalized when remInPx is null', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 640px) { .a { display: flex; } }',
+      { remInPx: null }
+    );
+    expect(result.rules).toEqual([]);
+  });
+
+  test('px media query with no rem-scale match skips the rule', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 999px) { .a { display: flex; } }'
+    );
+    expect(result.rules).toEqual([]);
+  });
+
+  test('media query width in unsupported units skips the rule', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 40em) { .a { display: flex; } }'
+    );
+    expect(result.rules).toEqual([]);
+  });
+
+  test('splitCommaTopLevel respects parens and trailing separators', () => {
+    expect(splitCommaTopLevel('a, b(c, d), e')).toEqual(['a', 'b(c, d)', 'e']);
+    expect(splitCommaTopLevel('a,')).toEqual(['a']);
+    expect(splitCommaTopLevel('')).toEqual([]);
   });
 });
