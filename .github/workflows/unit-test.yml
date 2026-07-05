@@ -10,9 +10,6 @@ jobs:
   unit-test:
     uses: refinist/workflows/.github/workflows/unit-test.yml@v1
     with:
-      # pnpm 11 itself requires Node >= 22.13, so the dev toolchain can't
-      # run on Node 20 in CI. The published dist still supports Node 20
-      # (see `engines`) — it's plain ESM with no toolchain dependency.
       node-versions: '22,24,25'
   coverage:
     uses: refinist/workflows/.github/workflows/coverage.yml@v1
