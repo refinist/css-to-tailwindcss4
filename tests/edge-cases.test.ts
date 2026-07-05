@@ -1344,9 +1344,9 @@ describe('v4-correctness branch coverage', () => {
   });
 
   test('scroll-padding auto uses the arbitrary form', async () => {
-    await expect(
-      classes('.a { scroll-padding-top: auto; }')
-    ).resolves.toEqual(['scroll-pt-[auto]']);
+    await expect(classes('.a { scroll-padding-top: auto; }')).resolves.toEqual([
+      'scroll-pt-[auto]'
+    ]);
   });
 
   test('three-value scale/translate expand per axis; four values stay leftover', async () => {
