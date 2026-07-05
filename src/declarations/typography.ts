@@ -42,8 +42,9 @@ const WHITE_SPACE: Record<string, string> = {
 const WORD_BREAK: Record<string, string> = {
   normal: 'break-normal',
   'break-all': 'break-all',
-  keep: 'break-keep',
-  'break-word': 'break-words'
+  'keep-all': 'break-keep',
+  // Deprecated CSS value; equivalent to `overflow-wrap: break-word`.
+  'break-word': 'wrap-break-word'
 };
 
 const TEXT_OVERFLOW: Record<string, string> = {
@@ -136,22 +137,31 @@ export const typographyHandlers: HandlerTable = {
   'font-family': (decl, theme) => {
     const token = fontFamilyToken(decl.value, theme);
     if (token) return [`font-${token}`];
-    return [arbitrary('font', decl.value)];
+    // A bare `font-(--x)` is font-WEIGHT in v4; family needs the hint.
+    return [arbitrary('font', decl.value, 'family-name')];
   },
 
   'font-size': (decl, theme) => {
     const v = normalizeValue(decl.value);
     const token = matchInNamespace(theme.reverse.text, v);
     if (token) return [`text-${token}`];
-    return [arbitrary('text', decl.value)];
+    // A bare `text-(--x)` is COLOR in v4; font-size needs the hint.
+    return [arbitrary('text', decl.value, 'length')];
   },
 
   'font-weight': (decl, theme) => {
-    const v = normalizeValue(decl.value);
+    const raw = normalizeValue(decl.value);
+    // CSS keywords never appear in the reverse map (it's keyed by the
+    // numeric values), and `font-[bold]` would compile to font-FAMILY.
+    const KEYWORD: Record<string, string> = { normal: '400', bold: '700' };
+    const v = KEYWORD[raw] ?? raw;
     const token = matchInNamespace(theme.reverse.fontWeight, v);
     if (token) return [`font-${token}`];
     if (/^\d+$/.test(v)) return [`font-[${v}]`];
-    return [arbitrary('font', decl.value)];
+    // `font-(--w)` IS font-weight in v4, so var() references are fine.
+    if (/^var\(/.test(v) || v.startsWith('--')) return [arbitrary('font', v)];
+    // `lighter` / `bolder` have no utility; keep the property explicit.
+    return [arbitraryProperty('font-weight', decl.value)];
   },
 
   'font-style': decl => {
@@ -234,7 +244,8 @@ export const typographyHandlers: HandlerTable = {
     if (v === 'from-font') return ['decoration-from-font'];
     const px = v.match(/^(\d+)px$/);
     if (px) return [`decoration-${px[1]}`];
-    return [arbitrary('decoration', decl.value)];
+    // A bare `decoration-(--x)` is decoration-COLOR in v4.
+    return [arbitrary('decoration', decl.value, 'length')];
   },
 
   'text-overflow': decl => {
@@ -330,8 +341,7 @@ export const typographyHandlers: HandlerTable = {
   },
 
   'font-feature-settings': decl => {
-    const v = normalizeValue(decl.value);
-    if (v === 'normal') return ['normal-nums'];
+    // `normal-nums` would set font-variant-numeric, a different property.
     return [arbitraryProperty('font-feature-settings', decl.value)];
   },
   'font-variation-settings': decl => {

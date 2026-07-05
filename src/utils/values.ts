@@ -22,6 +22,26 @@ export function splitTopLevel(input: string): string[] {
   return out;
 }
 
+// Split on top-level commas, respecting parens (for gradient stop lists,
+// transition lists, etc.).
+export function splitCommaTopLevel(input: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let buf = '';
+  for (const ch of input) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    if (depth === 0 && ch === ',') {
+      out.push(buf.trim());
+      buf = '';
+      continue;
+    }
+    buf += ch;
+  }
+  if (buf.trim()) out.push(buf.trim());
+  return out;
+}
+
 // `1.0` → `1`, `0.50rem` → `0.5rem`. Doesn't touch exponents.
 export function trimNumber(input: string): string {
   return input.replace(/-?\d+\.\d+/g, match => parseFloat(match).toString());

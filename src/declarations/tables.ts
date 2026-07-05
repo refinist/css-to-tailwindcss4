@@ -26,9 +26,13 @@ export const tableHandlers: HandlerTable = {
       return [arbitrary('border-spacing', decl.value)];
     }
     if (parts.length === 2) {
-      const x = matchSpacing(theme, parts[0]!, remInPx(options));
-      const y = matchSpacing(theme, parts[1]!, remInPx(options));
-      if (x && y) return [`border-spacing-x-${x}`, `border-spacing-y-${y}`];
+      // Always per-axis: a combined `border-spacing-[5px_7px]` expands the
+      // full value into BOTH axis variables and yields invalid CSS.
+      const x =
+        matchSpacing(theme, parts[0]!, remInPx(options)) ?? `[${parts[0]!}]`;
+      const y =
+        matchSpacing(theme, parts[1]!, remInPx(options)) ?? `[${parts[1]!}]`;
+      return [`border-spacing-x-${x}`, `border-spacing-y-${y}`];
     }
     return [arbitrary('border-spacing', decl.value)];
   },

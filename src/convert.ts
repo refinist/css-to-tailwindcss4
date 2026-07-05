@@ -155,11 +155,14 @@ function ancestorVariants(ctx: Context, rule: Rule): string[] | null {
     const at = cursor as AtRule;
     let variants: string[] | null = null;
     if (at.name === 'media') {
-      variants = mediaParamsToVariants(ctx.theme, at.params);
+      variants = mediaParamsToVariants(ctx.theme, at.params, ctx.options);
     } else if (at.name === 'container') {
-      variants = containerParamsToVariants(ctx.theme, at.params);
-    } else {
+      variants = containerParamsToVariants(ctx.theme, at.params, ctx.options);
+    } else if (at.name === 'supports') {
       variants = supportsParamsToVariants(at.params);
+    } else {
+      // @layer, @keyframes, @scope... — not expressible as variants.
+      return null;
     }
     if (variants === null) return null;
     collected.unshift(...variants);
@@ -188,8 +191,9 @@ function applyVariantsAndImportant(
   prefix?: string
 ): string {
   const variantChain = variants.length ? `${variants.join(':')}:` : '';
-  const shouldPrefix = Boolean(prefix) && cls[0] !== '[';
-  const withVariants = shouldPrefix
+  // v4 prefixes every utility, including arbitrary properties:
+  // `tw:[mask-type:luminance]`.
+  const withVariants = prefix
     ? `${prefix}:${variantChain}${cls}`
     : `${variantChain}${cls}`;
   return important ? `${withVariants}!` : withVariants;
