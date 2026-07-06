@@ -71,12 +71,14 @@ describe('convertCSS', () => {
     ]);
   });
 
-  test('applies a global prefix to every utility but never to arbitrary props', async () => {
+  test('applies a global prefix to every utility including arbitrary props', async () => {
     const { classes } = await convertCSS(
       `.x { display: flex; mask-type: luminance; }`,
       { prefix: 'tw', arbitraryProperties: true }
     );
-    expect(classes).toEqual(['tw:flex', '[mask-type:luminance]']);
+    // v4 prefixes arbitrary properties too: an unprefixed
+    // `[mask-type:luminance]` generates nothing under `prefix(tw)`.
+    expect(classes).toEqual(['tw:flex', 'tw:[mask-type:luminance]']);
   });
 
   test('emits arbitrary property classes only when explicitly opted in', async () => {

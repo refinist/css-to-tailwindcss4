@@ -26,17 +26,21 @@ export function selectorToVariants(selector: string): SelectorParts {
     if (root.nodes.length !== 1) return;
     const sel = root.nodes[0]!;
 
+    // Variants may only be pulled from the subject (the compound after the
+    // last combinator). A pseudo on an ancestor compound like
+    // `.parent:hover .child` cannot be expressed as a variant on the
+    // generated classes — lifting it would move the state to the child.
+    let lastCombinator = -1;
+    for (let i = 0; i < sel.nodes.length; i++) {
+      if (sel.nodes[i]!.type === 'combinator') lastCombinator = i;
+    }
+
     const variants: string[] = [];
     const base: Node[] = [];
-    let combinatorSeen = false;
 
-    for (const node of sel.nodes) {
-      if (node.type === 'combinator') {
-        combinatorSeen = true;
-        base.push(node);
-        continue;
-      }
-      if (combinatorSeen) {
+    for (let i = 0; i < sel.nodes.length; i++) {
+      const node = sel.nodes[i]!;
+      if (i <= lastCombinator) {
         base.push(node);
         continue;
       }
@@ -46,6 +50,13 @@ export function selectorToVariants(selector: string): SelectorParts {
       } else {
         base.push(node);
       }
+    }
+
+    // Bail when extraction leaves no subject to attach classes to
+    // (pure pseudo selectors like `:hover`, or `.parent > :hover`).
+    if (variants.length) {
+      const last = base[base.length - 1];
+      if (!last || last.type === 'combinator') return;
     }
 
     result = {
@@ -74,14 +85,19 @@ function nodeToVariant(node: Node): string[] | null {
     };
     const name = attr.attribute;
     if (name.startsWith('data-') || name.startsWith('aria-')) {
+      const kind = name.startsWith('data-') ? 'data' : 'aria';
       const rest = name.slice(name.indexOf('-') + 1);
-      if (!attr.operator)
-        return [`${name.startsWith('data-') ? 'data' : 'aria'}-${rest}`];
+      if (!attr.operator) {
+        // Bare presence. `data-x:` matches `[data-x]` in v4, but `aria-x:`
+        // means `[aria-x="true"]`, so aria needs the arbitrary form.
+        return kind === 'data' ? [`data-${rest}`] : [`aria-[${rest}]`];
+      }
       // Direct equality: `data-[state=open]`
       if (attr.operator === '=' && attr.value) {
-        return [
-          `${name.startsWith('data-') ? 'data' : 'aria'}-[${rest}=${attr.value}]`
-        ];
+        const value = String(attr.value).replace(/\s+/g, '_');
+        // `[aria-checked="true"]` is exactly what v4's `aria-checked:` means.
+        if (kind === 'aria' && value === 'true') return [`aria-${rest}`];
+        return [`${kind}-[${rest}=${value}]`];
       }
     }
     return null;

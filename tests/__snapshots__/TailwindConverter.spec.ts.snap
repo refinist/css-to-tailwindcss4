@@ -53,10 +53,10 @@ exports[`convertCSS > converts the broad fixture (default theme) > fixture.defau
   "justify-items-start",
   "justify-self-end",
   "place-self-stretch",
-  "p-4",
+  "pb-4",
   "pt-2",
   "px-6",
-  "-m-2",
+  "-mr-2",
   "ml-auto",
   "my-8",
   "scroll-p-4",
@@ -101,6 +101,8 @@ exports[`convertCSS > converts the broad fixture (default theme) > fixture.defau
   "bg-black/40",
   "bg-white",
   "bg-linear-to-r",
+  "from-white",
+  "to-black",
   "bg-center",
   "bg-cover",
   "bg-no-repeat",
@@ -168,8 +170,8 @@ exports[`convertCSS > converts the broad fixture (default theme) > fixture.defau
   "bg-slate-100",
   "before:content-none",
   "after:content-none",
-  "data-[state=open]:block",
-  "aria-[expanded=true]:flex",
+  "block",
+  "flex",
   "md:p-8",
   "md:text-base",
   "xl:grid",
@@ -196,7 +198,7 @@ exports[`convertCSS > converts the broad fixture (default theme) > fixture.defau
     @apply grid grid-cols-3 grid-rows-2 col-span-2 row-span-1 grid-flow-row-dense auto-cols-fr gap-4 place-items-center place-content-evenly justify-items-start justify-self-end place-self-stretch;
 }
 .spacing {
-    @apply p-4 pt-2 px-6 -m-2 ml-auto my-8 scroll-p-4 scroll-mt-1;
+    @apply pb-4 pt-2 px-6 -mr-2 ml-auto my-8 scroll-p-4 scroll-mt-1;
 }
 .sizing {
     @apply w-full h-dvh min-w-0 min-h-screen max-w-7xl max-h-fit aspect-video;
@@ -223,7 +225,7 @@ exports[`convertCSS > converts the broad fixture (default theme) > fixture.defau
     @apply bg-black/40;
 }
 .bg {
-    @apply bg-white bg-linear-to-r bg-center bg-cover bg-no-repeat bg-clip-padding bg-origin-border bg-fixed bg-blend-multiply;
+    @apply bg-white bg-linear-to-r from-white to-black bg-center bg-cover bg-no-repeat bg-clip-padding bg-origin-border bg-fixed bg-blend-multiply;
 }
 .borders {
     @apply border border-solid border-gray-200 border-t-2 border-r-black/10 rounded-lg rounded-tl-none border-dashed;
@@ -287,10 +289,10 @@ exports[`convertCSS > converts the broad fixture (default theme) > fixture.defau
     @apply before:content-none after:content-none;
 }
 [data-state='open'] {
-    @apply data-[state=open]:block;
+    @apply block;
 }
 [aria-expanded='true'] {
-    @apply aria-[expanded=true]:flex;
+    @apply flex;
 }
 .responsive {
     @apply md:p-8 md:text-base;

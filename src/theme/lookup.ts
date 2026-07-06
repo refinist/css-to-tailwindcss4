@@ -21,12 +21,23 @@ function escapeArbitrary(value: string): string {
 }
 
 // Wrap a value as an arbitrary utility value: `bg-[#fff]`, `bg-(--brand)`.
-export function arbitrary(prefix: string, value: string): string {
+//
+// `hint` is a v4 data-type hint (`length`, `family-name`, `image`, ...) for
+// prefixes that accept several value types. It's required for the paren
+// var shorthand — a bare `font-(--x)` is font-WEIGHT, `text-(--x)` is
+// color — because Tailwind cannot infer a type from an opaque variable.
+export function arbitrary(
+  prefix: string,
+  value: string,
+  hint?: string
+): string {
   const v = normalizeValue(value);
   // v4 paren syntax for CSS vars: `bg-(--brand)` instead of `bg-[--brand]`.
   const varMatch = v.match(/^var\((--[^,)\s]+)\)$/);
-  if (varMatch) return `${prefix}-(${varMatch[1]})`;
-  if (v.startsWith('--')) return `${prefix}-(${v})`;
+  const cssVar = varMatch ? varMatch[1]! : v.startsWith('--') ? v : null;
+  if (cssVar) {
+    return hint ? `${prefix}-(${hint}:${cssVar})` : `${prefix}-(${cssVar})`;
+  }
   return `${prefix}-[${escapeArbitrary(v)}]`;
 }
 

@@ -51,9 +51,10 @@ function size(
   const fraction = FRACTION[v];
   if (fraction) return [`${prefix}-${fraction}`];
 
-  // max-w/max-h prefer the container scale (the typical use of those
-  // properties is a content cap that maps to xs/sm/md/.../7xl).
-  if (prefix === 'max-w' || prefix === 'max-h') {
+  // max-w prefers the container scale (the typical use is a content cap
+  // that maps to xs/sm/md/.../7xl). Only width utilities resolve
+  // `--container-*` in v4 — `max-h-sm` does not exist.
+  if (prefix === 'max-w') {
     const container = theme.reverse.container.get(v);
     if (container) return [`${prefix}-${container}`];
   }

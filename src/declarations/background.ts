@@ -8,6 +8,8 @@ import {
   matchColorWithAlpha,
   normalizeValue
 } from '../theme/lookup.ts';
+import { splitCommaTopLevel, splitTopLevel } from '../utils/values.ts';
+import type { Theme } from '../types.ts';
 import type { HandlerTable } from './dispatch.ts';
 
 const BG_REPEAT: Record<string, string> = {
@@ -44,17 +46,35 @@ const BG_ATTACHMENT: Record<string, string> = {
   scroll: 'bg-scroll'
 };
 
+// v4.1 canonical corner names (`bg-top-left`); the pre-4.1 `bg-left-top`
+// spellings are deprecated. Both keyword orders are valid CSS input.
 const BG_POSITION: Record<string, string> = {
   bottom: 'bg-bottom',
   center: 'bg-center',
   left: 'bg-left',
-  'left bottom': 'bg-left-bottom',
-  'left top': 'bg-left-top',
   right: 'bg-right',
-  'right bottom': 'bg-right-bottom',
-  'right top': 'bg-right-top',
-  top: 'bg-top'
+  top: 'bg-top',
+  'left bottom': 'bg-bottom-left',
+  'bottom left': 'bg-bottom-left',
+  'left top': 'bg-top-left',
+  'top left': 'bg-top-left',
+  'right bottom': 'bg-bottom-right',
+  'bottom right': 'bg-bottom-right',
+  'right top': 'bg-top-right',
+  'top right': 'bg-top-right'
 };
+
+// Map a gradient color stop to a from-/via-/to- class.
+function gradientStop(prefix: string, value: string, theme: Theme): string {
+  const v = normalizeValue(value);
+  if (v === 'transparent') return `${prefix}-transparent`;
+  if (v === 'currentColor' || v === 'currentcolor') return `${prefix}-current`;
+  const direct = matchColor(theme, v);
+  if (direct) return `${prefix}-${direct}`;
+  const withAlpha = matchColorWithAlpha(theme, v);
+  if (withAlpha) return formatColorToken(prefix, withAlpha);
+  return arbitrary(prefix, v);
+}
 
 export const backgroundHandlers: HandlerTable = {
   'background-color': (decl, theme) => {
@@ -84,27 +104,47 @@ export const backgroundHandlers: HandlerTable = {
     return null;
   },
 
-  'background-image': decl => {
+  'background-image': (decl, theme) => {
     const v = normalizeValue(decl.value);
     if (v === 'none') return ['bg-none'];
-    // Common v4 utility: linear-gradient(...) → bg-linear-to-<dir>
-    const linear = v.match(/^linear-gradient\(\s*to\s+([a-z\s]+),/);
+    // Common v4 utility: linear-gradient(to <side>, stops) →
+    // bg-linear-to-<dir> from-* [via-*] to-*. The direction class alone
+    // renders nothing — the stops MUST be emitted with it.
+    const linear = v.match(/^linear-gradient\((.+)\)$/);
     if (linear) {
-      const dir = linear[1]!.trim().replace(/\s+/g, '-');
-      const dirMap: Record<string, string> = {
-        top: 't',
-        bottom: 'b',
-        left: 'l',
-        right: 'r',
-        'top-left': 'tl',
-        'top-right': 'tr',
-        'bottom-left': 'bl',
-        'bottom-right': 'br'
-      };
-      const d = dirMap[dir];
-      if (d) return [`bg-linear-to-${d}`];
+      const segments = splitCommaTopLevel(linear[1]!);
+      const dirMatch = segments[0]?.match(/^to\s+([a-z\s]+)$/);
+      if (dirMatch && segments.length >= 3) {
+        const dir = dirMatch[1]!.trim().replace(/\s+/g, '-');
+        const dirMap: Record<string, string> = {
+          top: 't',
+          bottom: 'b',
+          left: 'l',
+          right: 'r',
+          'top-left': 'tl',
+          'top-right': 'tr',
+          'bottom-left': 'bl',
+          'bottom-right': 'br'
+        };
+        const d = dirMap[dir];
+        const stops = segments.slice(1);
+        // Only plain color stops (no positions) map onto from/via/to.
+        const simple =
+          stops.length <= 3 && stops.every(s => splitTopLevel(s).length === 1);
+        if (d && simple) {
+          const classes = [`bg-linear-to-${d}`];
+          classes.push(gradientStop('from', stops[0]!, theme));
+          if (stops.length === 3)
+            classes.push(gradientStop('via', stops[1]!, theme));
+          classes.push(gradientStop('to', stops[stops.length - 1]!, theme));
+          return classes;
+        }
+      }
+      // Angles, positioned stops, >3 stops: keep the whole gradient.
+      return [arbitrary('bg', decl.value)];
     }
-    return [arbitrary('bg', decl.value)];
+    // A bare `bg-(--x)` is background-COLOR in v4; images need the hint.
+    return [arbitrary('bg', decl.value, 'image')];
   },
 
   'background-repeat': decl => {
@@ -115,13 +155,16 @@ export const backgroundHandlers: HandlerTable = {
   'background-size': decl => {
     const v = normalizeValue(decl.value);
     if (BG_SIZE[v]) return [BG_SIZE[v]!];
-    return [arbitrary('bg', decl.value)];
+    // `bg-[50%_100%]` would compile to background-POSITION.
+    return [arbitrary('bg-size', decl.value)];
   },
 
   'background-position': decl => {
     const v = normalizeValue(decl.value);
     if (BG_POSITION[v]) return [BG_POSITION[v]!];
-    return [arbitrary('bg', decl.value)];
+    // Bracket values infer position fine; var() needs the hint (a bare
+    // `bg-(--x)` is background-color).
+    return [arbitrary('bg', decl.value, 'position')];
   },
 
   'background-clip': decl => {

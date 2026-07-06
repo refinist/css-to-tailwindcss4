@@ -105,14 +105,15 @@ export const flexHandlers: HandlerTable = {
     const v = normalizeValue(decl.value);
     if (v === '0') return ['grow-0'];
     if (v === '1') return ['grow'];
-    if (/^\d+(\.\d+)?$/.test(v)) return [`grow-${v}`];
+    // Bare grow/shrink values must be integers in v4; `grow-1.5` is dead.
+    if (/^\d+$/.test(v)) return [`grow-${v}`];
     return [arbitrary('grow', decl.value)];
   },
   'flex-shrink': decl => {
     const v = normalizeValue(decl.value);
     if (v === '0') return ['shrink-0'];
     if (v === '1') return ['shrink'];
-    if (/^\d+(\.\d+)?$/.test(v)) return [`shrink-${v}`];
+    if (/^\d+$/.test(v)) return [`shrink-${v}`];
     return [arbitrary('shrink', decl.value)];
   },
   'flex-basis': (decl, theme, options) => {

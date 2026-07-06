@@ -37,6 +37,11 @@ interface AxisFamily {
   sides: [string, string, string, string];
   // {axis name → indices of sides covered}. `xy` means rolls up to base.
   pairs: Array<{ name: string; sides: [number, number] }>;
+  // When true, a later class for the same side overrides an earlier one
+  // (they target the same CSS property), so the earlier one is dropped.
+  // Border sides share a prefix between width and color values
+  // (`border-t-2` vs `border-t-white`), so they must NOT supersede.
+  supersede: boolean;
 }
 
 function spacingFamily(base: string, sidePrefix: string): AxisFamily {
@@ -51,7 +56,8 @@ function spacingFamily(base: string, sidePrefix: string): AxisFamily {
     pairs: [
       { name: `${sidePrefix}y`, sides: [0, 2] },
       { name: `${sidePrefix}x`, sides: [1, 3] }
-    ]
+    ],
+    supersede: true
   };
 }
 
@@ -66,7 +72,8 @@ const SPACING_FAMILIES: AxisFamily[] = [
     pairs: [
       { name: 'inset-y', sides: [0, 2] },
       { name: 'inset-x', sides: [1, 3] }
-    ]
+    ],
+    supersede: true
   },
   {
     base: 'border',
@@ -74,7 +81,8 @@ const SPACING_FAMILIES: AxisFamily[] = [
     pairs: [
       { name: 'border-y', sides: [0, 2] },
       { name: 'border-x', sides: [1, 3] }
-    ]
+    ],
+    supersede: false
   }
 ];
 
@@ -88,7 +96,8 @@ const RADIUS_FAMILY: AxisFamily = {
     { name: 'rounded-r', sides: [1, 2] },
     { name: 'rounded-b', sides: [2, 3] },
     { name: 'rounded-l', sides: [3, 0] }
-  ]
+  ],
+  supersede: true
 };
 
 interface DecomposedClass {
@@ -152,15 +161,16 @@ function mergeAxes(classes: string[]): string[] {
   // Build a working list of decomposed entries plus their original index.
   const entries = classes.map((c, idx) => ({ idx, dec: decompose(c) }));
 
-  // Group by (variants + sign + important) for variant-aware merging.
-  // Negative and positive sides never merge with each other.
-  const byScope = new Map<string, typeof entries>();
+  // Cascade cleanup groups by (variants + important) — sign does NOT
+  // split the group, because `-bottom-1/2` and a later `inset-auto`
+  // target the same CSS property regardless of sign.
+  const cascadeScope = new Map<string, typeof entries>();
   for (const e of entries) {
-    const key = `${e.dec.variants}${e.dec.negative ? '-' : ''}${e.dec.important ? '!' : ''}`;
-    let bucket = byScope.get(key);
+    const key = `${e.dec.variants}${e.dec.important ? '!' : ''}`;
+    let bucket = cascadeScope.get(key);
     if (!bucket) {
       bucket = [];
-      byScope.set(key, bucket);
+      cascadeScope.set(key, bucket);
     }
     bucket.push(e);
   }
@@ -169,6 +179,26 @@ function mergeAxes(classes: string[]): string[] {
   // shorthand replacement happens at the lowest original index.
   const replaced = new Map<number, string>();
   const removed = new Set<number>();
+
+  for (const bucket of cascadeScope.values()) {
+    for (const family of [...SPACING_FAMILIES, RADIUS_FAMILY]) {
+      supersedePass(bucket, family, removed);
+    }
+  }
+
+  // Merging groups by (variants + sign + important): negative and
+  // positive sides never merge with each other.
+  const byScope = new Map<string, typeof entries>();
+  for (const e of entries) {
+    if (removed.has(e.idx)) continue;
+    const key = `${e.dec.variants}${e.dec.negative ? '-' : ''}${e.dec.important ? '!' : ''}`;
+    let bucket = byScope.get(key);
+    if (!bucket) {
+      bucket = [];
+      byScope.set(key, bucket);
+    }
+    bucket.push(e);
+  }
 
   for (const bucket of byScope.values()) {
     for (const family of [...SPACING_FAMILIES, RADIUS_FAMILY]) {
@@ -203,6 +233,7 @@ function tryFamilyMerge(
     sideEntries[s] = new Map();
   }
   for (const e of bucket) {
+    if (removed.has(e.idx)) continue;
     const sideIdx = family.sides.indexOf(e.dec.prefix);
     if (sideIdx === -1) continue;
     sideEntries[sideIdx]!.set(e.dec.value, { idx: e.idx });
@@ -251,6 +282,42 @@ function tryFamilyMerge(
       sideEntries[b]!.delete(value);
     }
   }
+}
+
+// Cascade cleanup: a later class whose covered sides are a superset of an
+// earlier class's sides overrides it (`pt-4` then `pt-2`; `pr-4 pl-4` then
+// `px-6`). Without this the earlier class can win in Tailwind's own
+// ordering (`pt-2` sorts after `py-4`).
+function supersedePass(
+  bucket: Array<{ idx: number; dec: DecomposedClass }>,
+  family: AxisFamily,
+  removed: Set<number>
+) {
+  if (!family.supersede) return;
+  const kept: Array<{ idx: number; slots: number }> = [];
+  for (const e of bucket) {
+    const slots = familySlots(family, e.dec.prefix);
+    if (slots === 0) continue;
+    for (const prev of kept) {
+      if ((prev.slots & slots) === prev.slots && !removed.has(prev.idx)) {
+        removed.add(prev.idx);
+      }
+    }
+    kept.push({ idx: e.idx, slots });
+  }
+}
+
+// Bitmask of the sides (slots) a class prefix covers within a family:
+// base → all four, axis/pair names → two, side names → one, 0 → not ours.
+function familySlots(family: AxisFamily, prefix: string): number {
+  if (prefix === family.base) return 0b1111;
+  for (const pair of family.pairs) {
+    if (prefix === pair.name) {
+      return (1 << pair.sides[0]) | (1 << pair.sides[1]);
+    }
+  }
+  const side = family.sides.indexOf(prefix);
+  return side === -1 ? 0 : 1 << side;
 }
 
 function collectCommon(maps: Array<Map<string, unknown>>): string[] {

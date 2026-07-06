@@ -47,7 +47,14 @@ npm install -D css-to-tailwindcss4
 
 ## 🟢 Requirements
 
-Requires Node.js `^22.18.0 || >=24.0.0`.
+Requires Node.js `^20.19.0 || >=22.12.0`.
+
+## 🌊 Tailwind CSS compatibility
+
+Generated classes target **Tailwind CSS v4.1+** and are verified against
+**v4.3.x**. Some emitted variants (`pointer-coarse:`, `noscript:`,
+`user-valid:`, `details-content:`, `inverted-colors:`) and position names
+(`bg-top-left`) were introduced in v4.1 and do not exist in v4.0.
 
 ## 🚀 Usage
 

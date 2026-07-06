@@ -2,6 +2,7 @@
 
 import { arbitrary, matchSpacing, normalizeValue } from '../theme/lookup.ts';
 import { remInPx } from '../utils/options.ts';
+import { splitTopLevel } from '../utils/values.ts';
 import type { ConvertOptions, Theme } from '../types.ts';
 import type { HandlerTable } from './dispatch.ts';
 import type { Declaration } from 'postcss';
@@ -24,7 +25,12 @@ function spacingValue(
   allowNegative = false
 ): string[] {
   const v = normalizeValue(value);
-  if (v === 'auto') return [`${prefix}-auto`];
+  if (v === 'auto') {
+    // `m*-auto`/`inset-auto` exist; `scroll-p*-auto` does not (dead class).
+    return prefix.startsWith('scroll-p')
+      ? [arbitrary(prefix, v)]
+      : [`${prefix}-auto`];
+  }
   const negative = allowNegative && v.startsWith('-');
   const abs = negative ? v.slice(1) : v;
   const token = matchSpacing(theme, abs, remInPx(options));
@@ -40,7 +46,8 @@ function composedSpacing(
   fallbackPrefix: string,
   allowNegative = false
 ): string[] {
-  const parts = normalizeValue(decl.value).split(/\s+/);
+  // Paren-aware split so `calc(1rem + 2px)` / `var(--x, 4px)` stay intact.
+  const parts = splitTopLevel(normalizeValue(decl.value));
   if (parts.length < 1 || parts.length > 4)
     return [arbitrary(fallbackPrefix, decl.value)];
 

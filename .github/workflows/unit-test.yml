@@ -10,7 +10,7 @@ jobs:
   unit-test:
     uses: refinist/workflows/.github/workflows/unit-test.yml@v1
     with:
-      node-versions: '22,24,25'
+      node-versions: '20,22,24,25'
   coverage:
     uses: refinist/workflows/.github/workflows/coverage.yml@v1
     needs: unit-test

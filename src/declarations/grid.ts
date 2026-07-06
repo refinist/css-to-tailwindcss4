@@ -15,12 +15,18 @@ function gridTemplate(value: string, prefix: string): string[] {
   return [arbitrary(prefix, value)];
 }
 
+// `grid-column-start: -1` must become `-col-start-1`; `col-start--1`
+// does not exist in v4.
+function signedLine(prefix: string, v: string): string {
+  return v.startsWith('-') ? `-${prefix}-${v.slice(1)}` : `${prefix}-${v}`;
+}
+
 function lineSpan(value: string, prefix: string): string[] | null {
   const v = normalizeValue(value);
   if (v === 'auto') return [`${prefix}-auto`];
   const span = v.match(/^span\s+(\d+)(?:\s*\/\s*span\s+\d+)?$/);
   if (span) return [`${prefix}-span-${span[1]}`];
-  if (/^-?\d+$/.test(v)) return [`${prefix}-${v}`];
+  if (/^-?\d+$/.test(v)) return [signedLine(prefix, v)];
   return [arbitrary(prefix, value)];
 }
 
@@ -31,26 +37,26 @@ export const gridHandlers: HandlerTable = {
   'grid-column-start': decl => {
     const v = normalizeValue(decl.value);
     if (v === 'auto') return ['col-start-auto'];
-    if (/^-?\d+$/.test(v)) return [`col-start-${v}`];
+    if (/^-?\d+$/.test(v)) return [signedLine('col-start', v)];
     return [arbitrary('col-start', decl.value)];
   },
   'grid-column-end': decl => {
     const v = normalizeValue(decl.value);
     if (v === 'auto') return ['col-end-auto'];
-    if (/^-?\d+$/.test(v)) return [`col-end-${v}`];
+    if (/^-?\d+$/.test(v)) return [signedLine('col-end', v)];
     return [arbitrary('col-end', decl.value)];
   },
   'grid-row': decl => lineSpan(decl.value, 'row'),
   'grid-row-start': decl => {
     const v = normalizeValue(decl.value);
     if (v === 'auto') return ['row-start-auto'];
-    if (/^-?\d+$/.test(v)) return [`row-start-${v}`];
+    if (/^-?\d+$/.test(v)) return [signedLine('row-start', v)];
     return [arbitrary('row-start', decl.value)];
   },
   'grid-row-end': decl => {
     const v = normalizeValue(decl.value);
     if (v === 'auto') return ['row-end-auto'];
-    if (/^-?\d+$/.test(v)) return [`row-end-${v}`];
+    if (/^-?\d+$/.test(v)) return [signedLine('row-end', v)];
     return [arbitrary('row-end', decl.value)];
   },
   'grid-auto-flow': decl => {

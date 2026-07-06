@@ -88,11 +88,11 @@ export const transitionHandlers: HandlerTable = {
   'animation-duration': decl => [
     arbitraryProperty('animation-duration', decl.value)
   ],
-  'animation-name': (decl, theme) => {
+  'animation-name': decl => {
     const v = normalizeValue(decl.value);
     if (v === 'none') return ['animate-none'];
-    const token = matchInNamespace(theme.reverse.animate, v);
-    if (token) return [`animate-${token}`];
-    return null;
+    // `theme.reverse.animate` is keyed by full shorthand values, so a bare
+    // keyframe name can never match a token — keep the property explicit.
+    return [arbitraryProperty('animation-name', decl.value)];
   }
 };
