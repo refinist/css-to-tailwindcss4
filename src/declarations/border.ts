@@ -145,7 +145,10 @@ export const borderHandlers: HandlerTable = {
   'border-radius': (decl, theme) => {
     const v = normalizeValue(decl.value);
     if (v === '0' || v === '0px') return ['rounded-none'];
-    if (v === '9999px' || v === '50%' || v === 'full') return ['rounded-full'];
+    // `50%` produces elliptical corners on non-square boxes;
+    // `rounded-full` (calc(infinity*1px)) is the pill shape — not the same.
+    if (v === '50%') return ['rounded-[50%]'];
+    if (v === '9999px') return ['rounded-full'];
     const token = matchInNamespace(theme.reverse.radius, v);
     if (token) return [`rounded-${token}`];
     return [arbitrary('rounded', decl.value)];
@@ -218,7 +221,8 @@ export const borderHandlers: HandlerTable = {
 function corner(decl: Declaration, theme: Theme, prefix: string): string[] {
   const v = normalizeValue(decl.value);
   if (v === '0' || v === '0px') return [`${prefix}-none`];
-  if (v === '9999px' || v === '50%') return [`${prefix}-full`];
+  if (v === '50%') return [`${prefix}-[50%]`];
+  if (v === '9999px') return [`${prefix}-full`];
   const token = matchInNamespace(theme.reverse.radius, v);
   if (token) return [`${prefix}-${token}`];
   return [arbitrary(prefix, decl.value)];

@@ -14,6 +14,7 @@ import {
   asCssVarReference,
   isDynamicExpression,
   joinForArbitrary,
+  splitCommaTopLevel,
   splitTopLevel,
   trimNumber
 } from '../src/utils/values.ts';
@@ -52,8 +53,10 @@ describe('declaration edge cases', () => {
       'bg-black/25',
       'bg-none',
       'bg-linear-to-tl',
+      'from-[red]',
+      'to-[blue]',
       'bg-[radial-gradient(red,_blue)]',
-      'bg-[10px_20px]',
+      'bg-size-[10px_20px]',
       'bg-[20%_30%]',
       'bg-repeat-round',
       'bg-clip-text',
@@ -99,8 +102,7 @@ describe('declaration edge cases', () => {
       'border-[rebeccapurple]',
       'border-y-[rebeccapurple]',
       'border-l-[rebeccapurple]',
-      'rounded-none',
-      'rounded-full',
+      // the three sequential border-radius declarations cascade: last wins
       'rounded-[13px]',
       'rounded-tl-none',
       'rounded-tr-full',
@@ -298,7 +300,7 @@ describe('declaration edge cases', () => {
         text-indent: -4px;
         vertical-align: text-top;
         white-space: break-spaces;
-        word-break: keep;
+        word-break: keep-all;
         overflow-wrap: anywhere;
         hyphens: none;
         list-style-type: square;
@@ -339,7 +341,7 @@ describe('declaration edge cases', () => {
       'perspective-none',
       'perspective-origin-bottom-right',
       'backface-visible',
-      'zoom-normal',
+      'zoom-[normal]',
       'transition-opacity',
       'duration-200',
       'delay-100',
@@ -370,7 +372,7 @@ describe('declaration edge cases', () => {
       'list-outside',
       'list-image-none',
       'subpixel-antialiased',
-      'normal-nums',
+      '[font-feature-settings:normal]',
       'tab-(--tab)',
       'underline-offset-auto',
       'content-["x"]'
@@ -388,7 +390,7 @@ describe('parser and utility branches', () => {
 
   test('covers selector variant branches', () => {
     expect(selectorToVariants('.x[aria-checked]')).toEqual({
-      variants: ['aria-checked'],
+      variants: ['aria-[checked]'],
       base: '.x'
     });
     expect(selectorToVariants('.x[data-active]')).toEqual({
@@ -435,9 +437,10 @@ describe('parser and utility branches', () => {
       variants: [],
       base: '.a, .b'
     });
+    // pseudo on the subject (after the combinator) IS liftable
     expect(selectorToVariants('.x > .y:hover')).toEqual({
-      variants: [],
-      base: '.x > .y:hover'
+      variants: ['hover'],
+      base: '.x > .y'
     });
   });
 
@@ -466,7 +469,7 @@ describe('parser and utility branches', () => {
     ).toBeNull();
     expect(
       containerParamsToVariants(theme, 'sidebar (min-width: 28rem)')
-    ).toEqual(['@md']);
+    ).toEqual(['@md/sidebar']);
     expect(containerParamsToVariants(theme, '')).toBeNull();
     expect(containerParamsToVariants(theme, '(max-width: 28rem)')).toBeNull();
     expect(containerParamsToVariants(theme, '(min-width: 30rem)')).toBeNull();
@@ -606,27 +609,20 @@ describe('handler inventory', () => {
 
     expect(result).toEqual(
       expect.arrayContaining([
-        'pt-1',
-        'pr-2',
-        'pb-3',
-        'pl-4',
         'px-1',
         'py-2',
         'ps-3',
         'pe-4',
-        '-mr-1',
-        '-mb-2',
-        '-ml-3',
         'mx-auto',
         'my-1',
         'ms-2',
         'me-3',
-        'scroll-my-1',
-        'scroll-mx-2',
+        'scroll-mt-1',
+        'scroll-mr-2',
         'scroll-mb-3',
         'scroll-ml-4',
-        'scroll-py-1',
-        'scroll-px-2',
+        'scroll-pt-1',
+        'scroll-pr-2',
         'scroll-pb-3',
         'scroll-pl-4',
         'inline-grid',
@@ -640,12 +636,10 @@ describe('handler inventory', () => {
         'overflow-x-visible',
         'overflow-y-auto',
         'object-scale-down',
-        'top-auto',
-        'top-[33%]',
-        'right-full',
-        '-bottom-1/2',
-        'left-[calc(1px_+_1px)]',
         'z-(--z)',
+        'inset-auto',
+        'inset-y-1',
+        'inset-x-2',
         'flex-col-reverse',
         'flex-wrap-reverse',
         'flex-none',
@@ -791,7 +785,7 @@ describe('handler inventory', () => {
         'font-[fantasy]',
         'text-base',
         'font-bold',
-        'font-[boldish]',
+        '[font-weight:boldish]',
         'italic',
         'font-stretch-[unknown]',
         'stacked-fractions',
@@ -811,7 +805,6 @@ describe('handler inventory', () => {
         'indent-[calc(1px_+_1px)]',
         'align-[2px]',
         'whitespace-pre-line',
-        'break-words',
         'wrap-break-word',
         'wrap-normal',
         'hyphens-manual',
@@ -839,7 +832,7 @@ describe('handler inventory', () => {
         'scrollbar-gutter-[diagonal]',
         'forced-color-adjust-auto',
         'accent-auto',
-        'caret-auto',
+        'caret-[auto]',
         'caret-[rebeccapurple]',
         'bg-current',
         'bg-inherit',
@@ -905,12 +898,13 @@ describe('handler inventory', () => {
         'scale-none',
         'scale-(--scale)',
         'translate-x-[50%]',
-        'translate-x-[0]',
-        'translate-[1px_2px]',
+        'translate-x-0',
+        'translate-x-px',
+        'translate-y-0.5',
         'origin-[13px_14px]',
         'perspective-origin-[13px_14px]',
         'perspective-[13px]',
-        'zoom-reset',
+        'zoom-[reset]',
         'zoom-[calc(1_+_0.25)]',
         'transform-gpu',
         'opacity-[nope]',
@@ -1142,7 +1136,8 @@ describe('handler inventory', () => {
         'shrink',
         'order-2',
         'gap-[4px_nope]',
-        'border-spacing-[4px_nope]',
+        'border-spacing-x-1',
+        'border-spacing-y-[nope]',
         'z-10',
         '-z-10',
         'w-[100vh]',
@@ -1152,7 +1147,7 @@ describe('handler inventory', () => {
         'fill-black/25',
         'stroke-inherit',
         'scale-[abc%]',
-        'translate-[abc%]',
+        'translate-x-[abc%]',
         'zoom-[abc%]',
         'transform-none',
         '[animation-delay:200ms]',
@@ -1308,5 +1303,118 @@ describe('handler inventory', () => {
     expect(nthChildVariant('2n')).toBe('even');
     expect(nthChildVariant('2n+1')).toBe('odd');
     expect(nthChildVariant('n+2')).toBeNull();
+  });
+});
+
+// Branch coverage for the v4-correctness fixes: ancestor at-rule
+// whitelist, gradient stop color matching, per-axis transforms, and
+// px<->rem breakpoint normalization.
+describe('v4-correctness branch coverage', () => {
+  test('rules under non-convertible ancestor at-rules are left untouched', async () => {
+    const result = await convertCSS(
+      '@layer components { @media (min-width: 40rem) { .foo { display: flex; } } }'
+    );
+    expect(result.rules).toEqual([]);
+    expect(result.css).toContain('@layer components');
+    expect(result.css).toContain('display: flex');
+  });
+
+  test('gradient stops map keywords, alpha colors, and short stop lists', async () => {
+    await expect(
+      classes(`
+      .a { background-image: linear-gradient(to right, transparent, currentColor); }
+      .b { background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), red); }
+      .c { background-image: linear-gradient(to right, red); }
+    `)
+    ).resolves.toEqual([
+      'bg-linear-to-r',
+      'from-transparent',
+      'to-current',
+      'bg-linear-to-b',
+      'from-black/50',
+      'to-[red]',
+      'bg-[linear-gradient(to_right,_red)]'
+    ]);
+  });
+
+  test('corner radius 50% stays elliptical instead of rounded-full', async () => {
+    await expect(
+      classes('.a { border-top-left-radius: 50%; }')
+    ).resolves.toEqual(['rounded-tl-[50%]']);
+  });
+
+  test('scroll-padding auto uses the arbitrary form', async () => {
+    await expect(classes('.a { scroll-padding-top: auto; }')).resolves.toEqual([
+      'scroll-pt-[auto]'
+    ]);
+  });
+
+  test('three-value scale/translate expand per axis; four values stay leftover', async () => {
+    const result = await convertCSS(`
+      .a { scale: 1 0.5 2; translate: 4px 8px 12px; }
+      .b { scale: 1 2 3 4; translate: 1px 2px 3px 4px; }
+    `);
+    expect(result.rules[0]!.classes).toEqual([
+      'scale-x-100',
+      'scale-y-50',
+      'scale-z-200',
+      'translate-x-1',
+      'translate-y-2',
+      'translate-z-3'
+    ]);
+    expect(result.rules[1]!.classes).toEqual([]);
+    expect(result.rules[1]!.leftover.map(l => l.prop)).toEqual([
+      'scale',
+      'translate'
+    ]);
+  });
+
+  test('px-defined breakpoints match rem media queries (reverse direction)', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 48rem) { .a { display: flex; } }',
+      { themeCSS: '@theme { --breakpoint-md: 768px; }' }
+    );
+    expect(result.rules[0]!.classes).toEqual(['md:flex']);
+  });
+
+  test('non-integer scale percentages fall back to arbitrary', async () => {
+    await expect(classes('.a { scale: 1.055; }')).resolves.toEqual([
+      'scale-[1.055]'
+    ]);
+  });
+
+  test('rem media query with no matching breakpoint skips the rule', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 47rem) { .a { display: flex; } }'
+    );
+    expect(result.rules).toEqual([]);
+  });
+
+  test('px media query is not normalized when remInPx is null', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 640px) { .a { display: flex; } }',
+      { remInPx: null }
+    );
+    expect(result.rules).toEqual([]);
+  });
+
+  test('px media query with no rem-scale match skips the rule', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 999px) { .a { display: flex; } }'
+    );
+    expect(result.rules).toEqual([]);
+  });
+
+  test('media query width in unsupported units skips the rule', async () => {
+    const result = await convertCSS(
+      '@media (min-width: 40em) { .a { display: flex; } }'
+    );
+    expect(result.rules).toEqual([]);
+  });
+
+  test('splitCommaTopLevel respects parens and trailing separators', () => {
+    expect(splitCommaTopLevel('a, b(c, d), e')).toEqual(['a', 'b(c, d)', 'e']);
+    expect(splitCommaTopLevel('a,')).toEqual(['a']);
+    expect(splitCommaTopLevel('')).toEqual([]);
   });
 });

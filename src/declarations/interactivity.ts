@@ -88,7 +88,8 @@ const TOUCH_ACTION: Record<string, string> = {
 
 const WILL_CHANGE: Record<string, string> = {
   auto: 'will-change-auto',
-  scroll: 'will-change-scroll',
+  // `will-change-scroll` compiles to `will-change: scroll-position`.
+  'scroll-position': 'will-change-scroll',
   contents: 'will-change-contents',
   transform: 'will-change-transform'
 };
@@ -192,7 +193,8 @@ export const interactivityHandlers: HandlerTable = {
   },
   'caret-color': (decl, theme) => {
     const v = normalizeValue(decl.value);
-    if (v === 'auto') return ['caret-auto'];
+    // `caret-auto` doesn't exist in v4 (unlike `accent-auto`).
+    if (v === 'auto') return ['caret-[auto]'];
     const direct = matchColor(theme, v);
     if (direct) return [`caret-${direct}`];
     return [arbitrary('caret', decl.value)];

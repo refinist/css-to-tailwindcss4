@@ -1,6 +1,8 @@
 // Convert an `@media` rule's param list into Tailwind v4 variant tokens.
 
-import type { Theme } from '../types.ts';
+import { remInPx } from '../utils/options.ts';
+
+import type { ConvertOptions, Theme } from '../types.ts';
 
 const FEATURE_VARIANT: Record<string, string> = {
   print: 'print',
@@ -66,17 +68,49 @@ function normalizeFeature(feature: string): MediaFeature {
   return { raw, key };
 }
 
+// Look a width value up in a reverse map, normalizing px<->rem so
+// `@media (min-width: 640px)` still matches the rem-based default scale.
+function lookupWidth(
+  reverse: Map<string, string>,
+  raw: string,
+  pxPerRem: number | null
+): string | null {
+  const v = raw.trim();
+  const direct = reverse.get(v);
+  if (direct) return direct;
+  if (pxPerRem == null || pxPerRem === 0) return null;
+
+  const px = v.match(/^(-?[\d.]+)px$/);
+  if (px) {
+    const rem = `${trimZeros(parseFloat(px[1]!) / pxPerRem)}rem`;
+    return reverse.get(rem) ?? null;
+  }
+  const rem = v.match(/^(-?[\d.]+)rem$/);
+  if (rem) {
+    const asPx = `${trimZeros(parseFloat(rem[1]!) * pxPerRem)}px`;
+    return reverse.get(asPx) ?? null;
+  }
+  return null;
+}
+
+function trimZeros(n: number): string {
+  return parseFloat(n.toFixed(6)).toString();
+}
+
 // Try to find a `min-width: X` / `max-width: X` feature and map it back
-// to a breakpoint variant. Returns null when no exact theme match.
-function widthVariant(theme: Theme, feature: MediaFeature): string | null {
+// to a breakpoint variant. Returns null when no theme match.
+function widthVariant(
+  theme: Theme,
+  feature: MediaFeature,
+  pxPerRem: number | null
+): string | null {
   const min = feature.key.match(/^\(min-width: ([^)]+)\)$/);
   if (min) {
-    const token = theme.reverse.breakpoint.get(min[1]!.trim());
-    return token ?? null;
+    return lookupWidth(theme.reverse.breakpoint, min[1]!, pxPerRem);
   }
   const max = feature.key.match(/^\(max-width: ([^)]+)\)$/);
   if (max) {
-    const token = theme.reverse.breakpoint.get(max[1]!.trim());
+    const token = lookupWidth(theme.reverse.breakpoint, max[1]!, pxPerRem);
     return token ? `max-${token}` : null;
   }
   return null;
@@ -86,12 +120,14 @@ function widthVariant(theme: Theme, feature: MediaFeature): string | null {
 // Returns null if any feature is not convertible.
 export function mediaParamsToVariants(
   theme: Theme,
-  params: string
+  params: string,
+  options: ConvertOptions = {}
 ): string[] | null {
   // Tailwind only emits AND-style media combinations; OR (comma) goes to
   // multiple rules. We bail on commas.
   if (params.includes(',')) return null;
 
+  const pxPerRem = remInPx(options);
   const features = splitByKeyword(params, 'and');
   const variants: string[] = [];
   for (const f of features) {
@@ -102,7 +138,7 @@ export function mediaParamsToVariants(
       variants.push(direct);
       continue;
     }
-    const width = widthVariant(theme, feat);
+    const width = widthVariant(theme, feat, pxPerRem);
     if (width) {
       variants.push(width);
       continue;
@@ -113,23 +149,27 @@ export function mediaParamsToVariants(
 }
 
 // Convert an `@container (min-width: ...)` rule to `@<token>:` variant.
+// A named container (`sidebar (min-width: 24rem)`) keeps its name:
+// `@sm/sidebar:` — dropping it would match the nearest container instead.
 export function containerParamsToVariants(
   theme: Theme,
-  params: string
+  params: string,
+  options: ConvertOptions = {}
 ): string[] | null {
-  // Strip an optional container name (`sidebar (min-width: 24rem)`).
   const m = params.match(/^([\w-]+\s+)?(.+)$/);
   if (!m) return null;
+  const name = m[1]?.trim();
   const conds = m[2]!.trim();
   if (conds.includes(',')) return null;
+  const pxPerRem = remInPx(options);
   const features = splitByKeyword(conds, 'and');
   const variants: string[] = [];
   for (const f of features) {
     const min = f.match(/^\(min-width:\s*([^)]+)\)$/i);
     if (!min) return null;
-    const token = theme.reverse.container.get(min[1]!.trim());
+    const token = lookupWidth(theme.reverse.container, min[1]!, pxPerRem);
     if (!token) return null;
-    variants.push(`@${token}`);
+    variants.push(name ? `@${token}/${name}` : `@${token}`);
   }
   return variants;
 }
